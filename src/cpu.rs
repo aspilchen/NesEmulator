@@ -740,10 +740,12 @@ pub fn rol<Cart: Cartridge + Memory>(bus: &mut Bus<Cart>, address_mode: &Address
         _ => {
             let address = decode_address(bus, address_mode);
             let temp = bus.read(address);
-            (temp, 0)
+            (temp, address)
         }
     };
-    let (mut result, is_carry) = param.overflowing_shl(1);
+    let bitmask = 0x80;
+    let is_carry = (param & bitmask) != 0;
+    let mut result = param << 1;
     if (bus.cpu.status.contains(Status::Carry)) {
         result += 1;
     }
@@ -764,12 +766,14 @@ pub fn ror<Cart: Cartridge + Memory>(bus: &mut Bus<Cart>, address_mode: &Address
         _ => {
             let address = decode_address(bus, address_mode);
             let temp = bus.read(address);
-            (temp, 0)
+            (temp, address)
         }
     };
-    let (mut result, is_carry) = param.overflowing_shl(1);
+    let bitmask = 0x01;
+    let is_carry = (param & bitmask) != 0;
+    let mut result = param >> 1;
     if (bus.cpu.status.contains(Status::Carry)) {
-        result |= 0x80;
+        result += 0x80;
     }
     bus.cpu.status.set_flags(Status::Carry, is_carry);
     test_and_set_negative_flag(&mut bus.cpu, result);
