@@ -994,4 +994,124 @@ mod test_instructions {
             assert_eq!(bus.cpu.stack_ptr, 0xFF);
         }
     }
+
+    #[test]
+    fn sbc() {
+        let param = 0x01;
+        let test_code = vec![0x01, 0x7F, 0x01, 0x01];
+        let mut bus = Bus::new(TestCart::new(test_code));
+        let instruction = Instruction::SBC(AddressMode::Immediate);
+        let base_status = Status::default();
+        bus.cpu.accumulator = 0x80;
+        {
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.cpu.accumulator, 0x7F);
+            assert_eq!(bus.cpu.status, base_status | Status::Overflow);
+        }
+        {
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.cpu.accumulator, 0);
+            assert_eq!(bus.cpu.status, base_status | Status::Zero)
+        }
+        {
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.cpu.accumulator, 0xFF);
+            assert_eq!(
+                bus.cpu.status,
+                base_status | Status::Carry | Status::Negative
+            );
+        }
+        {
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.cpu.accumulator, 0xFD);
+            assert_eq!(bus.cpu.status, base_status | Status::Negative);
+        }
+    }
+
+    #[test]
+    fn sec() {
+        let test_code = vec![0x01, 0x7F, (-2i8) as u8];
+        let mut bus = Bus::new(TestCart::new(test_code));
+        let instruction = Instruction::SEC(AddressMode::Implied);
+        let base_status = Status::default();
+        {
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.cpu.status, base_status | Status::Carry);
+        }
+    }
+
+    #[test]
+    fn sed() {
+        let test_code = vec![0x01, 0x7F, (-2i8) as u8];
+        let mut bus = Bus::new(TestCart::new(test_code));
+        let instruction = Instruction::SED(AddressMode::Implied);
+        let base_status = Status::default();
+        {
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.cpu.status, base_status | Status::Decimal);
+        }
+    }
+
+    #[test]
+    fn sei() {
+        let test_code = vec![0x01, 0x7F, (-2i8) as u8];
+        let mut bus = Bus::new(TestCart::new(test_code));
+        let instruction = Instruction::SEI(AddressMode::Implied);
+        let base_status = Status::default();
+        {
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.cpu.status, base_status | Status::InturruptDisable);
+        }
+    }
+
+    #[test]
+    fn sta() {
+        let test_code = vec![0x01, 0x00, 0x05, 0x00];
+        let mut bus = Bus::new(TestCart::new(test_code));
+        let instruction = Instruction::STA(AddressMode::Absolute);
+        {
+            bus.cpu.accumulator = 0x20;
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.ram.memory[0x01], 0x20);
+        }
+        {
+            bus.cpu.accumulator = 0x80;
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.ram.memory[0x05], 0x80);
+        }
+    }
+
+    #[test]
+    fn stx() {
+        let test_code = vec![0x01, 0x00, 0x05, 0x00];
+        let mut bus = Bus::new(TestCart::new(test_code));
+        let instruction = Instruction::STX(AddressMode::Absolute);
+        {
+            bus.cpu.index_x = 0x20;
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.ram.memory[0x01], 0x20);
+        }
+        {
+            bus.cpu.index_x = 0x80;
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.ram.memory[0x05], 0x80);
+        }
+    }
+
+    #[test]
+    fn sty() {
+        let test_code = vec![0x01, 0x00, 0x05, 0x00];
+        let mut bus = Bus::new(TestCart::new(test_code));
+        let instruction = Instruction::STY(AddressMode::Absolute);
+        {
+            bus.cpu.index_y = 0x20;
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.ram.memory[0x01], 0x20);
+        }
+        {
+            bus.cpu.index_y = 0x80;
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.ram.memory[0x05], 0x80);
+        }
+    }
 }
