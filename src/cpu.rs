@@ -799,13 +799,13 @@ pub fn rts<Cart: Cartridge + Memory>(bus: &mut Bus<Cart>, address_mode: &Address
 
 pub fn sbc<Cart: Cartridge + Memory>(bus: &mut Bus<Cart>, address_mode: &AddressMode) {
     let address = decode_address(bus, address_mode);
-    let param = bus.read(address);
+    let param = !bus.read(address);
     let cpu = &mut bus.cpu;
     let accumulator = cpu.accumulator;
     let mut carry2 = false;
-    let (mut result, carry1) = accumulator.overflowing_sub(param);
+    let (mut result, carry1) = accumulator.overflowing_add(param);
     if (cpu.status.contains(Status::Carry)) {
-        (result, carry2) = result.overflowing_sub(1);
+        (result, carry2) = result.overflowing_add(1);
     }
     let is_carry = carry1 || carry2;
     cpu.status.set_flags(Status::Carry, is_carry);
