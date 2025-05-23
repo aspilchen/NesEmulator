@@ -380,19 +380,7 @@ pub fn execute<Cart: Cartridge + Memory>(bus: &mut Bus<Cart>, instruction: &Inst
 pub fn adc<Cart: Cartridge + Memory>(bus: &mut Bus<Cart>, address_mode: &AddressMode) {
     let address = decode_address(bus, address_mode);
     let param = bus.read(address);
-    let cpu = &mut bus.cpu;
-    let accumulator = cpu.accumulator;
-    let mut carry2 = false;
-    let (mut result, carry1) = accumulator.overflowing_add(param);
-    if (cpu.status.contains(Status::Carry)) {
-        (result, carry2) = result.overflowing_add(1);
-    }
-    let is_carry = carry1 || carry2;
-    cpu.status.set_flags(Status::Carry, is_carry);
-    test_and_set_overflow_flag(cpu, accumulator, param, result);
-    test_and_set_zero_flag(cpu, result);
-    test_and_set_negative_flag(cpu, result);
-    cpu.accumulator = result;
+    adc_helper(bus, param);
 }
 
 pub fn and<Cart: Cartridge + Memory>(bus: &mut Bus<Cart>, address_mode: &AddressMode) {
@@ -800,19 +788,7 @@ pub fn rts<Cart: Cartridge + Memory>(bus: &mut Bus<Cart>, address_mode: &Address
 pub fn sbc<Cart: Cartridge + Memory>(bus: &mut Bus<Cart>, address_mode: &AddressMode) {
     let address = decode_address(bus, address_mode);
     let param = !bus.read(address);
-    let cpu = &mut bus.cpu;
-    let accumulator = cpu.accumulator;
-    let mut carry2 = false;
-    let (mut result, carry1) = accumulator.overflowing_add(param);
-    if (cpu.status.contains(Status::Carry)) {
-        (result, carry2) = result.overflowing_add(1);
-    }
-    let is_carry = carry1 || carry2;
-    cpu.status.set_flags(Status::Carry, is_carry);
-    test_and_set_overflow_flag(cpu, accumulator, !param, result);
-    test_and_set_zero_flag(cpu, result);
-    test_and_set_negative_flag(cpu, result);
-    cpu.accumulator = result;
+    adc_helper(bus, param);
 }
 
 pub fn sec<Cart: Cartridge + Memory>(bus: &mut Bus<Cart>, address_mode: &AddressMode) {
@@ -917,4 +893,20 @@ fn stack_pop<Cart: Cartridge + Memory>(bus: &mut Bus<Cart>) -> u8 {
     let result = bus.read(address as usize);
     bus.cpu.stack_ptr += 1;
     return result;
+}
+
+fn adc_helper<Cart: Cartridge + Memory>(bus: &mut Bus<Cart>, param: u8) {
+    let cpu = &mut bus.cpu;
+    let accumulator = cpu.accumulator;
+    let mut carry2 = false;
+    let (mut result, carry1) = accumulator.overflowing_add(param);
+    if (cpu.status.contains(Status::Carry)) {
+        (result, carry2) = result.overflowing_add(1);
+    }
+    let is_carry = carry1 || carry2;
+    cpu.status.set_flags(Status::Carry, is_carry);
+    test_and_set_overflow_flag(cpu, accumulator, param, result);
+    test_and_set_zero_flag(cpu, result);
+    test_and_set_negative_flag(cpu, result);
+    cpu.accumulator = result;
 }

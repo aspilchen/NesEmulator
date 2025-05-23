@@ -997,33 +997,32 @@ mod test_instructions {
 
     #[test]
     fn sbc() {
-        let param = 0x01;
-        let test_code = vec![0x01, 0x7F, 0x01, 0x01];
+        let test_code = vec![0x01, 0x01, 0x7D, 0x01];
         let mut bus = Bus::new(TestCart::new(test_code));
         let instruction = Instruction::SBC(AddressMode::Immediate);
         let base_status = Status::default();
         bus.cpu.accumulator = 0x80;
         {
             execute(&mut bus, &instruction);
-            assert_eq!(bus.cpu.accumulator, 0x7F);
-            assert_eq!(bus.cpu.status, base_status | Status::Overflow);
+            assert_eq!(bus.cpu.accumulator, 0x7E);
+            assert_eq!(bus.cpu.status, base_status | Status::Overflow | Status::Carry);
+        }
+        {
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.cpu.accumulator, 0x7D);
+            assert_eq!(bus.cpu.status, base_status | Status::Carry);
         }
         {
             execute(&mut bus, &instruction);
             assert_eq!(bus.cpu.accumulator, 0);
-            assert_eq!(bus.cpu.status, base_status | Status::Zero)
-        }
-        {
-            execute(&mut bus, &instruction);
-            assert_eq!(bus.cpu.accumulator, 0xFF);
             assert_eq!(
                 bus.cpu.status,
-                base_status | Status::Carry | Status::Negative
+                base_status | Status::Zero | Status::Carry
             );
         }
         {
             execute(&mut bus, &instruction);
-            assert_eq!(bus.cpu.accumulator, 0xFD);
+            assert_eq!(bus.cpu.accumulator, 0xFF);
             assert_eq!(bus.cpu.status, base_status | Status::Negative);
         }
     }
@@ -1112,6 +1111,111 @@ mod test_instructions {
             bus.cpu.index_y = 0x80;
             execute(&mut bus, &instruction);
             assert_eq!(bus.ram.memory[0x05], 0x80);
+        }
+    }
+
+    #[test]
+    fn tax() {
+        let test_code = vec![0x01, 0x00, 0x05, 0x00];
+        let mut bus = Bus::new(TestCart::new(test_code));
+        let instruction = Instruction::TAX(AddressMode::Implied);
+        let base_status = Status::default();
+        {
+            bus.cpu.accumulator = 0x20;
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.cpu.index_x, 0x20);
+            assert_eq!(bus.cpu.status, base_status);
+        }
+        {
+            bus.cpu.accumulator = 0x0;
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.cpu.index_x, 0x0);
+            assert_eq!(bus.cpu.status, base_status | Status::Zero);
+        }
+        {
+            bus.cpu.accumulator = 0xFF;
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.cpu.index_x, 0xFF);
+            assert_eq!(bus.cpu.status, base_status | Status::Negative);
+        }
+    }
+
+    #[test]
+    fn tay() {
+        let test_code = vec![0x01, 0x00, 0x05, 0x00];
+        let mut bus = Bus::new(TestCart::new(test_code));
+        let instruction = Instruction::TAY(AddressMode::Implied);
+        let base_status = Status::default();
+        {
+            bus.cpu.accumulator = 0x20;
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.cpu.index_y, 0x20);
+            assert_eq!(bus.cpu.status, base_status);
+        }
+        {
+            bus.cpu.accumulator = 0x0;
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.cpu.index_y, 0x0);
+            assert_eq!(bus.cpu.status, base_status | Status::Zero);
+        }
+        {
+            bus.cpu.accumulator = 0xFF;
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.cpu.index_y, 0xFF);
+            assert_eq!(bus.cpu.status, base_status | Status::Negative);
+        }
+    }
+
+    #[test]
+    fn tsx() {
+        let test_code = vec![0x01, 0x00, 0x05, 0x00];
+        let mut bus = Bus::new(TestCart::new(test_code));
+        let instruction = Instruction::TSX(AddressMode::Implied);
+        let base_status = Status::default();
+        {
+            bus.cpu.stack_ptr = 0x20;
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.cpu.index_x, 0x20);
+            assert_eq!(bus.cpu.status, base_status);
+        }
+        {
+            bus.cpu.stack_ptr = 0x0;
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.cpu.index_x, 0x0);
+            assert_eq!(bus.cpu.status, base_status | Status::Zero);
+        }
+        {
+            bus.cpu.stack_ptr = 0xFF;
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.cpu.index_x, 0xFF);
+            assert_eq!(bus.cpu.status, base_status | Status::Negative);
+        }
+    }
+
+
+    #[test]
+    fn txa() {
+        let test_code = vec![0x01, 0x00, 0x05, 0x00];
+        let mut bus = Bus::new(TestCart::new(test_code));
+        let instruction = Instruction::TXA(AddressMode::Implied);
+        let base_status = Status::default();
+        {
+            bus.cpu.index_x = 0x20;
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.cpu.accumulator, 0x20);
+            assert_eq!(bus.cpu.status, base_status);
+        }
+        {
+            bus.cpu.index_x = 0x0;
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.cpu.accumulator, 0x0);
+            assert_eq!(bus.cpu.status, base_status | Status::Zero);
+        }
+        {
+            bus.cpu.index_x = 0xFF;
+            execute(&mut bus, &instruction);
+            assert_eq!(bus.cpu.accumulator, 0xFF);
+            assert_eq!(bus.cpu.status, base_status | Status::Negative);
         }
     }
 }
