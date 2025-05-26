@@ -1,3 +1,6 @@
+pub mod ram;
+pub mod status;
+
 use crate::{
     adress_mode::{decode_address, AddressMode},
     bus::Bus,
@@ -5,7 +8,7 @@ use crate::{
     memory::Memory,
 };
 
-use bitmask_enum::bitmask;
+pub use status::Status;
 use std::fmt;
 
 pub struct Cpu {
@@ -59,35 +62,6 @@ impl Cpu {
 
     pub fn increment_pc(&mut self) {
         self.program_counter += 1;
-    }
-}
-
-#[bitmask(u8)]
-#[bitmask_config(inverted_flags)]
-pub enum Status {
-    Carry,
-    Zero,
-    InturruptDisable,
-    Decimal,
-    B1,
-    Unused,
-    Overflow,
-    Negative,
-}
-
-impl Default for Status {
-    fn default() -> Self {
-        Status::Unused
-    }
-}
-
-impl Status {
-    pub fn set_flags(&mut self, flags: Status, is_set: bool) {
-        if (is_set) {
-            self.bits |= flags.bits;
-        } else {
-            self.bits &= flags.not().bits;
-        }
     }
 }
 
@@ -708,7 +682,7 @@ pub fn pha<Cart: Cartridge + Memory>(bus: &mut Bus<Cart>, address_mode: &Address
 }
 
 pub fn php<Cart: Cartridge + Memory>(bus: &mut Bus<Cart>, address_mode: &AddressMode) {
-    let value = bus.cpu.status.bits;
+    let value = bus.cpu.status.bits();
     stack_push(bus, value);
 }
 
@@ -719,7 +693,7 @@ pub fn pla<Cart: Cartridge + Memory>(bus: &mut Bus<Cart>, address_mode: &Address
 
 pub fn plp<Cart: Cartridge + Memory>(bus: &mut Bus<Cart>, address_mode: &AddressMode) {
     let value = stack_pop(bus);
-    bus.cpu.status = Status { bits: value };
+    bus.cpu.status = Status::from(value);
 }
 
 pub fn rol<Cart: Cartridge + Memory>(bus: &mut Bus<Cart>, address_mode: &AddressMode) {

@@ -26,16 +26,12 @@ impl Memory for Ram {
 }
 
 impl Ram {
-    const N_BYTES: usize = 2048;
+    pub const N_BYTES: usize = 2048;
+    pub const BEGIN: usize = 0;
+    pub const END: usize = 0x1FFF;
+    const MIRROR_MASK: usize = 0x7FF;
 
     pub fn map_address(address: usize) -> usize {
-        let result = if (address < Ram::N_BYTES) {
-            address
-        } else if (Ram::N_BYTES <= address && address < Ram::N_BYTES * 2) {
-            address - Ram::N_BYTES
-        } else {
-            panic!("invalid memory access {:04X}", address)
-        };
-        return result;
+        return address & Self::MIRROR_MASK;
     }
 }
