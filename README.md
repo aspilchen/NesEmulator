@@ -1,5 +1,5 @@
 # NESEmulator
-NES Emulator in Rust. This is a work in progress. At the moment the emulator is fixed to running a test cartridge containing Snake, intended to verify the function of CPU instructions (some bugs need fixing)
+NES Emulator in Rust. This is a work in progress. This doesn't work at the moment. A previous commit would boot a test ROM that played Snake. However, now that proper cartridge mapping and PPU are being implemented, Snake doesnt work anymore.
 
 ## TODO:
 - Complete CPU instructions (validation, etc.)
