@@ -3,6 +3,8 @@ use crate::nes::memory::Memory;
 use super::status::Status;
 use std::fmt;
 
+const STACK_PAGE: usize = 0x100;
+
 pub struct Ricoh6502 {
     pub accumulator: u8,
     pub index_x: u8,
@@ -65,8 +67,6 @@ impl Ricoh6502 {
     pub const RAM_BEGIN: usize = 0;
     pub const RAM_END: usize = 0x1FFF;
     pub const RAM_SIZE: usize = 0x800;
-    pub const STACK_PAGE: usize = 0x0100;
-    pub const STACK_BOTTOM: usize = 0x1FF;
     pub const STACK_PTR_INIT: u8 = 0xFF;
 
     fn map_address(&self, address: usize) -> usize {
@@ -75,13 +75,15 @@ impl Ricoh6502 {
     }
 
     pub fn stack_push(&mut self, value: u8) {
-        self.ram[self.stack_ptr as usize] = value;
+        let address = STACK_PAGE + self.stack_ptr as usize;
         self.stack_ptr -= 1;
+        self.ram[address] = value;
     }
 
     pub fn stack_pop(&mut self) -> u8 {
+        let address = STACK_PAGE + self.stack_ptr as usize;
         self.stack_ptr += 1;
-        return self.ram[self.stack_ptr as usize];
+        return self.ram[address];
     }
 
     pub fn increment_pc(&mut self) {
