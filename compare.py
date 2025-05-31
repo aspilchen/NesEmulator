@@ -2,7 +2,7 @@
 my_output = []
 expected_output = []
 
-with open('output.txt') as f:
+with open('output.log') as f:
     for line in f:
         my_output.append(line.split())
 

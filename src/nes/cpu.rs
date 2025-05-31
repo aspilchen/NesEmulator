@@ -987,7 +987,7 @@ pub fn axs(bus: &mut Bus, address_mode: &AddressMode) {
 pub fn dcp(bus: &mut Bus, address_mode: &AddressMode) {
     let address = decode_address(bus, address_mode);
     let param = bus.read(address);
-    let (mut result, _) = param.overflowing_sub(1);
+    let (result, _) = param.overflowing_sub(1);
     let accumulator = bus.cpu.accumulator;
     compare_helper(&mut bus.cpu, accumulator, result);
     bus.write(address, result);
@@ -998,7 +998,11 @@ pub fn dop(bus: &mut Bus, address_mode: &AddressMode) {
 }
 
 pub fn isc(bus: &mut Bus, address_mode: &AddressMode) {
-    todo!();
+    let address = decode_address(bus, address_mode);
+    let param = bus.read(address);
+    let (param, _) = param.overflowing_add(1);
+    adc_helper(bus, !param);
+    bus.write(address, param);
 }
 
 pub fn kil(bus: &mut Bus, address_mode: &AddressMode) {
@@ -1019,19 +1023,61 @@ pub fn lax(bus: &mut Bus, address_mode: &AddressMode) {
 }
 
 pub fn rla(bus: &mut Bus, address_mode: &AddressMode) {
-    todo!();
+    let address = decode_address(bus, address_mode);
+    let param = bus.read(address);
+    let mut result_1 = param << 1;
+    if (bus.cpu.status.contains(Status::Carry)) {
+        result_1 |= 0x01;
+    }
+    let mask = 0x80;
+    bus.cpu.status.set_flags(Status::Carry, param & mask != 0);
+    bus.write(address, result_1);
+    let accumulator = bus.cpu.accumulator;
+    let result_2 = result_1 & accumulator;
+    bus.cpu.accumulator = result_2;
+    test_and_set_negative_flag(&mut bus.cpu, result_2);
+    test_and_set_zero_flag(&mut bus.cpu, result_2);
 }
 
 pub fn rra(bus: &mut Bus, address_mode: &AddressMode) {
-    todo!();
+    let address = decode_address(bus, address_mode);
+    let param = bus.read(address);
+    let mut result = param >> 1;
+    if (bus.cpu.status.contains(Status::Carry)) {
+        result |= 0x80;
+    }
+    let mask = 0x01;
+    bus.cpu.status.set_flags(Status::Carry, param & mask != 0);
+    bus.write(address, result);
+    adc_helper(bus, result);
 }
 
 pub fn slo(bus: &mut Bus, address_mode: &AddressMode) {
-    todo!();
+    let address = decode_address(bus, address_mode);
+    let param = bus.read(address);
+    let result_1 = param << 1;
+    let mask = 0x80;
+    bus.cpu.status.set_flags(Status::Carry, param & mask != 0);
+    bus.write(address, result_1);
+    let accumulator = bus.cpu.accumulator;
+    let result_2 = result_1 | accumulator;
+    bus.cpu.accumulator = result_2;
+    test_and_set_negative_flag(&mut bus.cpu, result_2);
+    test_and_set_zero_flag(&mut bus.cpu, result_2);
 }
 
 pub fn sre(bus: &mut Bus, address_mode: &AddressMode) {
-    todo!();
+    let address = decode_address(bus, address_mode);
+    let param = bus.read(address);
+    let result_1 = param >> 1;
+    let mask = 0x01;
+    bus.cpu.status.set_flags(Status::Carry, param & mask != 0);
+    bus.write(address, result_1);
+    let accumulator = bus.cpu.accumulator;
+    let result_2 = result_1 ^ accumulator;
+    bus.cpu.accumulator = result_2;
+    test_and_set_negative_flag(&mut bus.cpu, result_2);
+    test_and_set_zero_flag(&mut bus.cpu, result_2);
 }
 
 pub fn sxa(bus: &mut Bus, address_mode: &AddressMode) {
