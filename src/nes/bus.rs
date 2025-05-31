@@ -6,6 +6,15 @@ pub struct Bus {
     // pub ppu: Ppu,
 }
 
+impl Default for Bus {
+    fn default() -> Self {
+        Self {
+            cart: Default::default(),
+            cpu: Default::default(),
+        }
+    }
+}
+
 impl Memory for Bus {
     fn read(&mut self, address: usize) -> u8 {
         let device = self.map_device(address);

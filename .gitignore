@@ -1,1 +1,3 @@
 target
+*.log
+cpu_dummy_reads.nes

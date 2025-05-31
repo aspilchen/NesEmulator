@@ -7,7 +7,7 @@ pub enum Status {
     Zero,
     InturruptDisable,
     Decimal,
-    B1,
+    B,
     Unused,
     Overflow,
     Negative,
@@ -15,7 +15,7 @@ pub enum Status {
 
 impl Default for Status {
     fn default() -> Self {
-        Status::Unused
+        Status::Unused | Status::InturruptDisable
     }
 }
 

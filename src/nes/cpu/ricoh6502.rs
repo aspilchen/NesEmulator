@@ -67,7 +67,7 @@ impl Ricoh6502 {
     pub const RAM_BEGIN: usize = 0;
     pub const RAM_END: usize = 0x1FFF;
     pub const RAM_SIZE: usize = 0x800;
-    pub const STACK_PTR_INIT: u8 = 0xFF;
+    pub const STACK_PTR_INIT: u8 = 0xFD;
 
     fn map_address(&self, address: usize) -> usize {
         let mirror_mask = 0x7FF;
@@ -81,8 +81,8 @@ impl Ricoh6502 {
     }
 
     pub fn stack_pop(&mut self) -> u8 {
-        let address = STACK_PAGE + self.stack_ptr as usize;
         self.stack_ptr += 1;
+        let address = STACK_PAGE + self.stack_ptr as usize;
         return self.ram[address];
     }
 

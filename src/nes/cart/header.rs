@@ -1,4 +1,3 @@
-use bitflags::bitflags;
 use bitmask_enum::bitmask;
 
 const FORMAT_TAG_SIZE: usize = 4;
@@ -17,6 +16,18 @@ pub struct Header {
     pub num_chr_banks: u8,
     pub control: Control,
     pub num_ram_banks: u8,
+}
+
+impl Default for Header {
+    fn default() -> Self {
+        Self {
+            format_tag: Default::default(),
+            num_prg_banks: Default::default(),
+            num_chr_banks: Default::default(),
+            control: Default::default(),
+            num_ram_banks: Default::default(),
+        }
+    }
 }
 
 impl Header {
@@ -40,6 +51,15 @@ impl Header {
 pub struct Control {
     pub control_one: ControlOne,
     pub control_two: ControlTwo,
+}
+
+impl Default for Control {
+    fn default() -> Self {
+        Self {
+            control_one: ControlOne::none(),
+            control_two: ControlTwo::none(),
+        }
+    }
 }
 
 impl Control {

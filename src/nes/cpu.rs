@@ -1,11 +1,11 @@
 pub mod adress_modes;
-pub mod status;
 pub mod ricoh6502;
+pub mod status;
 
+use super::{bus::Bus, memory::Memory};
 use adress_modes::{decode_address, AddressMode};
 use ricoh6502::Ricoh6502;
 use status::Status;
-use super::{bus::Bus, memory::Memory};
 
 #[derive(Debug)]
 pub enum Instruction {
@@ -65,6 +65,32 @@ pub enum Instruction {
     TXA(AddressMode),
     TXS(AddressMode),
     TYA(AddressMode),
+    // unofficial
+    AAC(AddressMode),
+    AAX(AddressMode),
+    ARR(AddressMode),
+    ASR(AddressMode),
+    ATX(AddressMode),
+    AXA(AddressMode),
+    AXS(AddressMode),
+    DCP(AddressMode),
+    DOP(AddressMode),
+    ISC(AddressMode),
+    KIL(AddressMode),
+    LAR(AddressMode),
+    LAX(AddressMode),
+    RLA(AddressMode),
+    RRA(AddressMode),
+    SLO(AddressMode),
+    SRE(AddressMode),
+    SXA(AddressMode),
+    SYA(AddressMode),
+    TOP(AddressMode),
+    XAA(AddressMode),
+    XAS(AddressMode),
+    // duplicates
+    // NOP(AddressMode),
+    // SBC(AddressMode),
 }
 
 pub fn fetch(bus: &mut Bus) -> u8 {
@@ -227,7 +253,113 @@ pub fn decode(op_code: u8, bus: &mut Bus) -> Instruction {
         0x8A => Instruction::TXA(AddressMode::Implied),
         0x9A => Instruction::TXS(AddressMode::Implied),
         0x98 => Instruction::TYA(AddressMode::Implied),
-        _ => panic!("invalid opcode"),
+        // unofficial instructions
+        0x0B => Instruction::AAC(AddressMode::Immediate),
+        0x2B => Instruction::AAC(AddressMode::Immediate),
+        0x87 => Instruction::AAX(AddressMode::ZeroPage),
+        0x97 => Instruction::AAX(AddressMode::ZeroPageY),
+        0x83 => Instruction::AAX(AddressMode::IndirectX),
+        0x8F => Instruction::AAX(AddressMode::Absolute),
+        0x6B => Instruction::ARR(AddressMode::Immediate),
+        0x4B => Instruction::ASR(AddressMode::Immediate),
+        0xAB => Instruction::ATX(AddressMode::Immediate),
+        0x9F => Instruction::AXA(AddressMode::AbsoluteY),
+        0x93 => Instruction::AXA(AddressMode::IndirectY),
+        0xCB => Instruction::AXS(AddressMode::Immediate),
+        0xC7 => Instruction::DCP(AddressMode::ZeroPage),
+        0xD7 => Instruction::DCP(AddressMode::ZeroPageX),
+        0xCF => Instruction::DCP(AddressMode::Absolute),
+        0xDF => Instruction::DCP(AddressMode::AbsoluteX),
+        0xDB => Instruction::DCP(AddressMode::AbsoluteY),
+        0xC3 => Instruction::DCP(AddressMode::IndirectX),
+        0xD3 => Instruction::DCP(AddressMode::IndirectY),
+        0x04 => Instruction::DOP(AddressMode::ZeroPage),
+        0x14 => Instruction::DOP(AddressMode::ZeroPageX),
+        0x34 => Instruction::DOP(AddressMode::ZeroPageX),
+        0x44 => Instruction::DOP(AddressMode::ZeroPage),
+        0x54 => Instruction::DOP(AddressMode::ZeroPageX),
+        0x64 => Instruction::DOP(AddressMode::ZeroPage),
+        0x74 => Instruction::DOP(AddressMode::ZeroPageX),
+        0x80 => Instruction::DOP(AddressMode::Immediate),
+        0x82 => Instruction::DOP(AddressMode::Immediate),
+        0x89 => Instruction::DOP(AddressMode::Immediate),
+        0xC2 => Instruction::DOP(AddressMode::Immediate),
+        0xD4 => Instruction::DOP(AddressMode::ZeroPageX),
+        0xE2 => Instruction::DOP(AddressMode::Immediate),
+        0xF4 => Instruction::DOP(AddressMode::ZeroPageX),
+        0xE7 => Instruction::ISC(AddressMode::ZeroPage),
+        0xF7 => Instruction::ISC(AddressMode::ZeroPageX),
+        0xEF => Instruction::ISC(AddressMode::Absolute),
+        0xFF => Instruction::ISC(AddressMode::AbsoluteX),
+        0xFB => Instruction::ISC(AddressMode::AbsoluteY),
+        0xE3 => Instruction::ISC(AddressMode::IndirectX),
+        0xF3 => Instruction::ISC(AddressMode::IndirectY),
+        0x02 => Instruction::KIL(AddressMode::Implied),
+        0x12 => Instruction::KIL(AddressMode::Implied),
+        0x22 => Instruction::KIL(AddressMode::Implied),
+        0x32 => Instruction::KIL(AddressMode::Implied),
+        0x42 => Instruction::KIL(AddressMode::Implied),
+        0x52 => Instruction::KIL(AddressMode::Implied),
+        0x62 => Instruction::KIL(AddressMode::Implied),
+        0x72 => Instruction::KIL(AddressMode::Implied),
+        0x92 => Instruction::KIL(AddressMode::Implied),
+        0xB2 => Instruction::KIL(AddressMode::Implied),
+        0xD2 => Instruction::KIL(AddressMode::Implied),
+        0xF2 => Instruction::KIL(AddressMode::Implied),
+        0xBB => Instruction::LAR(AddressMode::AbsoluteY),
+        0xA7 => Instruction::LAX(AddressMode::ZeroPage),
+        0xB7 => Instruction::LAX(AddressMode::ZeroPageY),
+        0xAF => Instruction::LAX(AddressMode::Absolute),
+        0xBF => Instruction::LAX(AddressMode::AbsoluteY),
+        0xA3 => Instruction::LAX(AddressMode::IndirectX),
+        0xB3 => Instruction::LAX(AddressMode::IndirectY),
+        0x1A => Instruction::NOP(AddressMode::Implied),
+        0x3A => Instruction::NOP(AddressMode::Implied),
+        0x5A => Instruction::NOP(AddressMode::Implied),
+        0x7A => Instruction::NOP(AddressMode::Implied),
+        0xDA => Instruction::NOP(AddressMode::Implied),
+        0xFA => Instruction::NOP(AddressMode::Implied),
+        0x27 => Instruction::RLA(AddressMode::ZeroPage),
+        0x37 => Instruction::RLA(AddressMode::ZeroPageX),
+        0x2F => Instruction::RLA(AddressMode::Absolute),
+        0x3F => Instruction::RLA(AddressMode::AbsoluteX),
+        0x3B => Instruction::RLA(AddressMode::AbsoluteY),
+        0x23 => Instruction::RLA(AddressMode::IndirectX),
+        0x33 => Instruction::RLA(AddressMode::IndirectY),
+        0x67 => Instruction::RRA(AddressMode::ZeroPage),
+        0x77 => Instruction::RRA(AddressMode::ZeroPageX),
+        0x6F => Instruction::RRA(AddressMode::Absolute),
+        0x7F => Instruction::RRA(AddressMode::AbsoluteX),
+        0x7B => Instruction::RRA(AddressMode::AbsoluteY),
+        0x63 => Instruction::RRA(AddressMode::IndirectX),
+        0x73 => Instruction::RRA(AddressMode::IndirectY),
+        0xEB => Instruction::SBC(AddressMode::Immediate),
+        0x07 => Instruction::SLO(AddressMode::ZeroPage),
+        0x17 => Instruction::SLO(AddressMode::ZeroPageX),
+        0x0F => Instruction::SLO(AddressMode::Absolute),
+        0x1F => Instruction::SLO(AddressMode::AbsoluteX),
+        0x1B => Instruction::SLO(AddressMode::AbsoluteY),
+        0x03 => Instruction::SLO(AddressMode::IndirectX),
+        0x13 => Instruction::SLO(AddressMode::IndirectY),
+        0x47 => Instruction::SRE(AddressMode::ZeroPage),
+        0x57 => Instruction::SRE(AddressMode::ZeroPageX),
+        0x4F => Instruction::SRE(AddressMode::Absolute),
+        0x5F => Instruction::SRE(AddressMode::AbsoluteX),
+        0x5B => Instruction::SRE(AddressMode::AbsoluteY),
+        0x43 => Instruction::SRE(AddressMode::IndirectX),
+        0x53 => Instruction::SRE(AddressMode::IndirectY),
+        0x9E => Instruction::SXA(AddressMode::AbsoluteY),
+        0x9C => Instruction::SYA(AddressMode::AbsoluteX),
+        0x0C => Instruction::TOP(AddressMode::Absolute),
+        0x1C => Instruction::TOP(AddressMode::AbsoluteX),
+        0x3C => Instruction::TOP(AddressMode::AbsoluteX),
+        0x5C => Instruction::TOP(AddressMode::AbsoluteX),
+        0x7C => Instruction::TOP(AddressMode::AbsoluteX),
+        0xDC => Instruction::TOP(AddressMode::AbsoluteX),
+        0xFC => Instruction::TOP(AddressMode::AbsoluteX),
+        0x8B => Instruction::XAA(AddressMode::Immediate),
+        0x9B => Instruction::XAS(AddressMode::Immediate),
+        // _ => panic!("invalid opcode 0x{:02X}", op_code),
     }
 }
 
@@ -289,6 +421,28 @@ pub fn execute(bus: &mut Bus, instruction: &Instruction) {
         Instruction::TXA(address_mode) => txa(bus, address_mode),
         Instruction::TXS(address_mode) => txs(bus, address_mode),
         Instruction::TYA(address_mode) => tya(bus, address_mode),
+        Instruction::AAC(address_mode) => aac(bus, address_mode),
+        Instruction::AAX(address_mode) => aax(bus, address_mode),
+        Instruction::ARR(address_mode) => arr(bus, address_mode),
+        Instruction::ASR(address_mode) => asr(bus, address_mode),
+        Instruction::ATX(address_mode) => atx(bus, address_mode),
+        Instruction::AXA(address_mode) => axa(bus, address_mode),
+        Instruction::AXS(address_mode) => axs(bus, address_mode),
+        Instruction::DCP(address_mode) => dcp(bus, address_mode),
+        Instruction::DOP(address_mode) => dop(bus, address_mode),
+        Instruction::ISC(address_mode) => isc(bus, address_mode),
+        Instruction::KIL(address_mode) => kil(bus, address_mode),
+        Instruction::LAR(address_mode) => lar(bus, address_mode),
+        Instruction::LAX(address_mode) => lax(bus, address_mode),
+        Instruction::RLA(address_mode) => rla(bus, address_mode),
+        Instruction::RRA(address_mode) => rra(bus, address_mode),
+        Instruction::SLO(address_mode) => slo(bus, address_mode),
+        Instruction::SRE(address_mode) => sre(bus, address_mode),
+        Instruction::SXA(address_mode) => sxa(bus, address_mode),
+        Instruction::SYA(address_mode) => sya(bus, address_mode),
+        Instruction::TOP(address_mode) => top(bus, address_mode),
+        Instruction::XAA(address_mode) => xaa(bus, address_mode),
+        Instruction::XAS(address_mode) => xas(bus, address_mode),
         _ => panic!("invalid instruction"),
     }
 }
@@ -363,14 +517,13 @@ pub fn beq(bus: &mut Bus, address_mode: &AddressMode) {
 
 pub fn bit(bus: &mut Bus, address_mode: &AddressMode) {
     let address = decode_address(bus, address_mode);
+    let mask = Status::Overflow | Status::Negative;
     let accumulator = bus.cpu.accumulator;
     let param = bus.read(address);
     let result = accumulator & param;
-    let cpu = &mut bus.cpu;
-    test_and_set_zero_flag(cpu, result);
-    test_and_set_negative_flag(cpu, result);
-    let is_overflow = (result & 0b01000000) != 0;
-    cpu.status.set_flags(Status::Overflow, is_overflow);
+    test_and_set_zero_flag(&mut bus.cpu, result);
+    let param_flags = Status::from(param);
+    bus.cpu.status = (bus.cpu.status & !mask) | (param_flags & mask);
 }
 
 pub fn bmi(bus: &mut Bus, address_mode: &AddressMode) {
@@ -438,12 +591,7 @@ pub fn cmp(bus: &mut Bus, address_mode: &AddressMode) {
     let param = bus.read(address);
     let cpu = &mut bus.cpu;
     let accumulator = cpu.accumulator;
-    let is_carry = accumulator >= param;
-    cpu.status.set_flags(Status::Carry, is_carry);
-    let is_zero = accumulator == param;
-    cpu.status.set_flags(Status::Zero, is_zero);
-    let is_negative = accumulator < param;
-    cpu.status.set_flags(Status::Negative, is_negative);
+    compare_helper(cpu, accumulator, param);
 }
 
 pub fn cpx(bus: &mut Bus, address_mode: &AddressMode) {
@@ -451,12 +599,7 @@ pub fn cpx(bus: &mut Bus, address_mode: &AddressMode) {
     let param = bus.read(address);
     let cpu = &mut bus.cpu;
     let index_x = cpu.index_x;
-    let is_carry = index_x >= param;
-    cpu.status.set_flags(Status::Carry, is_carry);
-    let is_zero = index_x == param;
-    cpu.status.set_flags(Status::Zero, is_zero);
-    let is_negative = index_x < param;
-    cpu.status.set_flags(Status::Negative, is_negative);
+    compare_helper(cpu, index_x, param);
 }
 
 pub fn cpy(bus: &mut Bus, address_mode: &AddressMode) {
@@ -464,12 +607,7 @@ pub fn cpy(bus: &mut Bus, address_mode: &AddressMode) {
     let param = bus.read(address);
     let cpu = &mut bus.cpu;
     let index_y = cpu.index_y;
-    let is_carry = index_y >= param;
-    cpu.status.set_flags(Status::Carry, is_carry);
-    let is_zero = index_y == param;
-    cpu.status.set_flags(Status::Zero, is_zero);
-    let is_negative = index_y < param;
-    cpu.status.set_flags(Status::Negative, is_negative);
+    compare_helper(cpu, index_y, param);
 }
 
 pub fn dec(bus: &mut Bus, address_mode: &AddressMode) {
@@ -548,7 +686,7 @@ pub fn jmp(bus: &mut Bus, address_mode: &AddressMode) {
 pub fn jsr(bus: &mut Bus, address_mode: &AddressMode) {
     let param = decode_address(bus, address_mode);
     let cpu = &mut bus.cpu;
-    let bytes = cpu.program_counter.wrapping_sub(1).to_le_bytes();
+    let bytes = (cpu.program_counter - 1).to_le_bytes();
     cpu.stack_push(bytes[1]);
     cpu.stack_push(bytes[0]);
     bus.cpu.program_counter = param as u16;
@@ -625,18 +763,24 @@ pub fn pha(bus: &mut Bus, address_mode: &AddressMode) {
 }
 
 pub fn php(bus: &mut Bus, address_mode: &AddressMode) {
-    let value = bus.cpu.status.bits();
+    let value = (bus.cpu.status | Status::B | Status::Unused).bits();
     bus.cpu.stack_push(value);
 }
 
 pub fn pla(bus: &mut Bus, address_mode: &AddressMode) {
     let value = bus.cpu.stack_pop();
+    test_and_set_negative_flag(&mut bus.cpu, value);
+    test_and_set_zero_flag(&mut bus.cpu, value);
     bus.cpu.accumulator = value;
 }
 
 pub fn plp(bus: &mut Bus, address_mode: &AddressMode) {
     let value = bus.cpu.stack_pop();
-    bus.cpu.status = Status::from(value);
+    let mask = Status::B | Status::Unused;
+    let param = Status::from(value);
+    let current = bus.cpu.status;
+    let result = (current & mask) | (param & !mask);
+    bus.cpu.status = result;
 }
 
 pub fn rol(bus: &mut Bus, address_mode: &AddressMode) {
@@ -692,14 +836,22 @@ pub fn ror(bus: &mut Bus, address_mode: &AddressMode) {
 }
 
 pub fn rti(bus: &mut Bus, address_mode: &AddressMode) {
-    todo!("RTI not implemented");
+    let value = bus.cpu.stack_pop();
+    let mask = Status::B | Status::Unused;
+    let param = Status::from(value);
+    let current = bus.cpu.status;
+    bus.cpu.status = (current & mask) | (param & !mask);
+    let mut bytes = [0, 0];
+    bytes[0] = bus.cpu.stack_pop();
+    bytes[1] = bus.cpu.stack_pop();
+    bus.cpu.program_counter = u16::from_le_bytes(bytes);
 }
 
 pub fn rts(bus: &mut Bus, address_mode: &AddressMode) {
     let mut bytes = [0, 0];
     bytes[0] = bus.cpu.stack_pop();
     bytes[1] = bus.cpu.stack_pop();
-    bus.cpu.program_counter = u16::from_le_bytes(bytes).wrapping_add(1);
+    bus.cpu.program_counter = u16::from_le_bytes(bytes) + 1;
 }
 
 pub fn sbc(bus: &mut Bus, address_mode: &AddressMode) {
@@ -784,6 +936,124 @@ pub fn tya(bus: &mut Bus, address_mode: &AddressMode) {
     test_and_set_zero_flag(cpu, value);
 }
 
+// Unofficial instructions
+
+pub fn aac(bus: &mut Bus, address_mode: &AddressMode) {
+    let address = decode_address(bus, address_mode);
+    let param = bus.read(address);
+    let accumulator = bus.cpu.accumulator;
+    let result = param & accumulator;
+    let is_negative = (result as i8) < 0;
+    bus.cpu
+        .status
+        .set_flags(Status::Negative | Status::Carry, is_negative);
+    bus.cpu.status.set_flags(Status::Zero, result == 0);
+}
+
+pub fn aax(bus: &mut Bus, address_mode: &AddressMode) {
+    let address = decode_address(bus, address_mode);
+    let accumulator = bus.cpu.accumulator;
+    let index_x = bus.cpu.index_x;
+    let result = accumulator & index_x;
+    // test_and_set_negative_flag(&mut bus.cpu, result);
+    // test_and_set_zero_flag(&mut bus.cpu, result);
+    bus.write(address, result);
+}
+
+pub fn arr(bus: &mut Bus, address_mode: &AddressMode) {
+    todo!();
+    let address = decode_address(bus, address_mode);
+    let param = bus.read(address);
+    let accumulator = bus.cpu.accumulator;
+    let result = (accumulator & param) >> 1;
+}
+
+pub fn asr(bus: &mut Bus, address_mode: &AddressMode) {
+    todo!();
+}
+
+pub fn atx(bus: &mut Bus, address_mode: &AddressMode) {
+    todo!();
+}
+
+pub fn axa(bus: &mut Bus, address_mode: &AddressMode) {
+    todo!();
+}
+
+pub fn axs(bus: &mut Bus, address_mode: &AddressMode) {
+    todo!();
+}
+
+pub fn dcp(bus: &mut Bus, address_mode: &AddressMode) {
+    let address = decode_address(bus, address_mode);
+    let param = bus.read(address);
+    let (mut result, _) = param.overflowing_sub(1);
+    let accumulator = bus.cpu.accumulator;
+    compare_helper(&mut bus.cpu, accumulator, result);
+    bus.write(address, result);
+}
+
+pub fn dop(bus: &mut Bus, address_mode: &AddressMode) {
+    let _ = decode_address(bus, address_mode);
+}
+
+pub fn isc(bus: &mut Bus, address_mode: &AddressMode) {
+    todo!();
+}
+
+pub fn kil(bus: &mut Bus, address_mode: &AddressMode) {
+    todo!();
+}
+
+pub fn lar(bus: &mut Bus, address_mode: &AddressMode) {
+    todo!();
+}
+
+pub fn lax(bus: &mut Bus, address_mode: &AddressMode) {
+    let address = decode_address(bus, address_mode);
+    let param = bus.read(address);
+    bus.cpu.accumulator = param;
+    bus.cpu.index_x = param;
+    test_and_set_negative_flag(&mut bus.cpu, param);
+    test_and_set_zero_flag(&mut bus.cpu, param);
+}
+
+pub fn rla(bus: &mut Bus, address_mode: &AddressMode) {
+    todo!();
+}
+
+pub fn rra(bus: &mut Bus, address_mode: &AddressMode) {
+    todo!();
+}
+
+pub fn slo(bus: &mut Bus, address_mode: &AddressMode) {
+    todo!();
+}
+
+pub fn sre(bus: &mut Bus, address_mode: &AddressMode) {
+    todo!();
+}
+
+pub fn sxa(bus: &mut Bus, address_mode: &AddressMode) {
+    todo!();
+}
+
+pub fn sya(bus: &mut Bus, address_mode: &AddressMode) {
+    todo!();
+}
+
+pub fn top(bus: &mut Bus, address_mode: &AddressMode) {
+    let _ = decode_address(bus, address_mode);
+}
+
+pub fn xaa(bus: &mut Bus, address_mode: &AddressMode) {
+    todo!();
+}
+
+pub fn xas(bus: &mut Bus, address_mode: &AddressMode) {
+    todo!();
+}
+
 fn test_and_set_negative_flag(cpu: &mut Ricoh6502, result: u8) {
     let is_negative = (result as i8) < 0;
     cpu.status.set_flags(Status::Negative, is_negative);
@@ -813,4 +1083,11 @@ fn adc_helper(bus: &mut Bus, param: u8) {
     test_and_set_zero_flag(cpu, result);
     test_and_set_negative_flag(cpu, result);
     cpu.accumulator = result;
+}
+
+fn compare_helper(cpu: &mut Ricoh6502, left: u8, right: u8) {
+    let (result, _) = left.overflowing_sub(right);
+    cpu.status.set_flags(Status::Carry, left >= right);
+    cpu.status.set_flags(Status::Zero, left == right);
+    cpu.status.set_flags(Status::Negative, result & 0x80 != 0);
 }

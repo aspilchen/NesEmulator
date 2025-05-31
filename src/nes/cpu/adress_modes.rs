@@ -20,10 +20,7 @@ pub enum AddressMode {
     IndirectIndexed,
 }
 
-pub fn decode_address(
-    bus: &mut Bus,
-    address_mode: &AddressMode,
-) -> usize {
+pub fn decode_address(bus: &mut Bus, address_mode: &AddressMode) -> usize {
     match address_mode {
         AddressMode::Absolute => absolute(bus),
         AddressMode::AbsoluteX => absolute_x(bus),
@@ -69,9 +66,15 @@ pub fn immediate(bus: &mut Bus) -> usize {
 
 pub fn indirect(bus: &mut Bus) -> usize {
     let param = fetch_16(bus) as usize;
+    let mask = 0xFF;
     let mut bytes = [0, 0];
-    bytes[0] = bus.read(param);
-    bytes[1] = bus.read(param + 1);
+    if (param & mask == mask) {
+        bytes[0] = bus.read(param);
+        bytes[1] = bus.read(param & !mask);
+    } else {
+        bytes[0] = bus.read(param);
+        bytes[1] = bus.read(param + 1);
+    }
     let result = u16::from_le_bytes(bytes) as usize;
     return result;
 }
@@ -79,7 +82,7 @@ pub fn indirect(bus: &mut Bus) -> usize {
 pub fn indirect_x(bus: &mut Bus) -> usize {
     let param = fetch(bus);
     let index = bus.cpu.index_x;
-    let address1 = param.wrapping_add(index) as u16;
+    let address1 = param.wrapping_add(index);
     let address2 = address1.wrapping_add(1);
     let mut bytes = [0, 0];
     bytes[0] = bus.read(address1 as usize);

@@ -9,6 +9,7 @@ const HEADER_SIZE: usize = 0x10;
 const TRAINER_SIZE: usize = 512;
 const PRG_BANK_SIZE: usize = 0x4000;
 const CHR_BANK_SIZE: usize = 0x2000;
+const PRG_BEGIN: usize = 0x8000;
 
 pub struct Cart {
     pub header: Header,
@@ -21,15 +22,26 @@ pub struct Cart {
     // pub rom_end: usize,
 }
 
+impl Default for Cart {
+    fn default() -> Self {
+        Self {
+            header: Default::default(),
+            prg_rom: Default::default(),
+            chr_rom: Default::default(),
+        }
+    }
+}
+
 impl Memory for Cart {
     fn read(&mut self, address: usize) -> u8 {
-        todo!();
-        // return self.memory[address];
+        let address = self.map_address(address);
+        return self.prg_rom[address];
     }
 
     fn write(&mut self, address: usize, value: u8) {
-        todo!();
-        // self.memory[address] = value;
+        if (!self.header.control.control_one.contains(ControlOne::Ram)) {
+            panic!("invalid write to 0x{:04X}", address);
+        }
     }
 }
 
@@ -61,6 +73,7 @@ impl Cart {
     }
 
     fn map_address(&self, address: usize) -> usize {
-        return address - Self::BEGIN;
+        let result = (address - PRG_BEGIN) % (self.header.num_prg_banks as usize * PRG_BANK_SIZE);
+        return result;
     }
 }
