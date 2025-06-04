@@ -1,9 +1,12 @@
+use std::fmt::DebugList;
+
 use super::{cart::Cart, cpu::ricoh6502::Ricoh6502, inturrupts::reset, memory::Memory};
 
 pub struct Bus {
     pub cart: Cart,
     pub cpu: Ricoh6502,
     // pub ppu: Ppu,
+    pub clock: i64,
 }
 
 impl Default for Bus {
@@ -11,6 +14,8 @@ impl Default for Bus {
         Self {
             cart: Default::default(),
             cpu: Default::default(),
+            // ppu: Default::default(),
+            clock: 7,
         }
     }
 }
@@ -33,6 +38,7 @@ impl Bus {
             cart: cart,
             cpu: Default::default(),
             // ppu: Default::default(),
+            clock: 7,
         };
         reset(&mut result);
         return result;
@@ -45,5 +51,9 @@ impl Bus {
             // Ppu::BEGIN..=Ppu::END | Ppu::DMA => &mut self.ppu,
             _ => panic!("invalid memory access at 0x{:04X}", address),
         }
+    }
+
+    pub fn tick(&mut self, n_cycles: i64) {
+        self.clock += n_cycles;
     }
 }
