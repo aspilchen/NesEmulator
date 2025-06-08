@@ -1,13 +1,12 @@
 use bitmask_enum::bitmask;
 
 #[bitmask(u8)]
-#[bitmask_config(inverted_flags)]
 pub enum Status {
     Carry,
     Zero,
-    InturruptDisable,
+    InterruptDisable,
     Decimal,
-    B1,
+    B,
     Unused,
     Overflow,
     Negative,
@@ -15,7 +14,7 @@ pub enum Status {
 
 impl Default for Status {
     fn default() -> Self {
-        Status::Unused
+        Status::Unused | Status::InterruptDisable
     }
 }
 

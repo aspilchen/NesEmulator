@@ -1,64 +1,7 @@
-use crate::{cartridge::Cartridge, memory::Memory};
-
-struct TestCart {
-    pub mem: Vec<u8>,
-}
-
-impl Memory for TestCart {
-    fn read(&mut self, address: usize) -> u8 {
-        let address = Self::map_address(address);
-        return self.mem[address];
-    }
-
-    fn write(&mut self, address: usize, value: u8) {
-        // println!("write {} at {}", value, address);
-        let address = Self::map_address(address);
-        self.mem[address] = value;
-    }
-}
-
-impl Cartridge for TestCart {
-    fn get_reset_vector(&self) -> u16 {
-        return 0x8000;
-    }
-
-    fn get_size(&self) -> usize {
-        return self.mem.len();
-    }
-
-    fn begin(&self) -> usize {
-        return 0x8000;
-    }
-}
-
-impl Default for TestCart {
-    fn default() -> Self {
-        Self { mem: vec![0; 1024] }
-    }
-}
-
-impl TestCart {
-    pub const BEGIN: usize = 0x8000;
-
-    pub fn new(mem: Vec<u8>) -> Self {
-        return Self { mem: mem };
-    }
-
-    fn map_address(address: usize) -> usize {
-        return address - Self::BEGIN;
-    }
-}
-
 #[cfg(test)]
 mod test_instructions {
-    use crate::{
-        adress_mode::AddressMode,
-        bus::Bus,
-        cpu::{execute, Cpu, Instruction, Status},
-        test::instructions,
-    };
+    use crate::nes::{bus::Bus, cpu::{adress_modes::AddressMode, execute, status::Status, Instruction}};
 
-    use super::*;
 
     #[test]
     fn adc() {

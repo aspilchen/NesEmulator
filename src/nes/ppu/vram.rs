@@ -1,4 +1,4 @@
-use crate::memory::Memory;
+use crate::nes::memory::Memory;
 
 pub struct VRam {
     pub memory: [u8; Self::SIZE],
