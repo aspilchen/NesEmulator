@@ -5,6 +5,7 @@ use std::fmt;
 
 const STACK_PAGE: usize = 0x100;
 
+#[derive(Debug)]
 pub struct Ricoh6502 {
     pub accumulator: u8,
     pub index_x: u8,

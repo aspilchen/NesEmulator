@@ -1,11 +1,14 @@
-use std::fmt::DebugList;
+use crate::nes::{
+    inturrupts::nmi,
+    ppu::{Ppu, CPU_TO_PPU_CYCLE_SCALE},
+};
 
 use super::{cart::Cart, cpu::ricoh6502::Ricoh6502, inturrupts::reset, memory::Memory};
 
 pub struct Bus {
     pub cart: Cart,
     pub cpu: Ricoh6502,
-    // pub ppu: Ppu,
+    pub ppu: Ppu,
     pub clock: i64,
 }
 
@@ -14,7 +17,7 @@ impl Default for Bus {
         Self {
             cart: Default::default(),
             cpu: Default::default(),
-            // ppu: Default::default(),
+            ppu: Default::default(),
             clock: 7,
         }
     }
@@ -37,7 +40,7 @@ impl Bus {
         let mut result = Self {
             cart: cart,
             cpu: Default::default(),
-            // ppu: Default::default(),
+            ppu: Default::default(),
             clock: 7,
         };
         reset(&mut result);
@@ -48,12 +51,16 @@ impl Bus {
         match address {
             Ricoh6502::RAM_BEGIN..=Ricoh6502::RAM_END => &mut self.cpu,
             Cart::BEGIN..=Cart::END => &mut self.cart,
-            // Ppu::BEGIN..=Ppu::END | Ppu::DMA => &mut self.ppu,
+            Ppu::BEGIN..=Ppu::END | Ppu::DMA => &mut self.ppu,
             _ => panic!("invalid memory access at 0x{:04X}", address),
         }
     }
 
     pub fn tick(&mut self, n_cycles: i64) {
         self.clock += n_cycles;
+        self.ppu.tick(n_cycles * CPU_TO_PPU_CYCLE_SCALE);
+        if (self.ppu.is_nmi_interrupt) {
+            nmi(self);
+        }
     }
 }

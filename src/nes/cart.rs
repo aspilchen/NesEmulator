@@ -16,10 +16,6 @@ pub struct Cart {
     pub prg_rom: Vec<u8>,
     pub chr_rom: Vec<u8>,
     // pub ram: Vec<u8>,
-    // pub ram_begin: usize,
-    // pub ram_end: usize,
-    // pub rom_begin: usize,
-    // pub rom_end: usize,
 }
 
 impl Default for Cart {
@@ -35,6 +31,8 @@ impl Default for Cart {
 impl Memory for Cart {
     fn read(&mut self, address: usize) -> u8 {
         let address = self.map_address(address);
+        let result = self.prg_rom[address];
+        println!("{:02X}", result);
         return self.prg_rom[address];
     }
 
@@ -53,12 +51,12 @@ impl Cart {
         let header = Header::new(&raw_data);
         let prg_size = header.num_prg_banks as usize * PRG_BANK_SIZE;
         let chr_size = header.num_chr_banks as usize * CHR_BANK_SIZE;
-        let trainer_skip = if (header.control.control_one.contains(ControlOne::Trainer)) {
+        let trainer_size = if (header.control.control_one.contains(ControlOne::Trainer)) {
             TRAINER_SIZE
         } else {
             0
         };
-        let prg_begin = HEADER_SIZE + trainer_skip;
+        let prg_begin = HEADER_SIZE + trainer_size;
         let prg_end = prg_begin + prg_size;
         let chr_begin = prg_end;
         let chr_end = chr_begin + chr_size;
@@ -66,9 +64,6 @@ impl Cart {
             header: header,
             prg_rom: raw_data[prg_begin..prg_end].to_vec(),
             chr_rom: raw_data[chr_begin..chr_end].to_vec(),
-            // ram_end: ram_end,
-            // rom_begin: rom_begin,
-            // rom_end: rom_end,
         };
     }
 

@@ -14,4 +14,4 @@ with open('nestest.log') as f:
 for mine, expected in zip(my_output, expected_output):
     # if(mine[0] != expected[0] or mine[-1] != expected[-1]):
     if(mine[-1] != expected[-1]):
-        print(mine[0] + ' '  + mine[-1] + ' | ' + expected[-1])
+        print(mine[0] + ' '  + mine[-2] + ' | ' + expected[-2])

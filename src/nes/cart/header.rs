@@ -3,8 +3,8 @@ use bitmask_enum::bitmask;
 const FORMAT_TAG_SIZE: usize = 4;
 const ROM_BANK_SIZE: usize = 0x4000;
 
-const ROM_BANK_ADDRESS: usize = 5;
-const VROM_BANK_ADDRESS: usize = 6;
+const PRG_BANKS_ADDRESS: usize = 4;
+const CHR_BANKS_ADDRESS: usize = 5;
 const CONTROL_1: usize = 7;
 const CONTROL_2: usize = 8;
 const RAM_BANK_ADDRESS: usize = 9;
@@ -34,8 +34,8 @@ impl Header {
     pub fn new(ines_data: &Vec<u8>) -> Self {
         return Self {
             format_tag: [ines_data[0], ines_data[1], ines_data[2], ines_data[3]],
-            num_prg_banks: ines_data[ROM_BANK_ADDRESS],
-            num_chr_banks: ines_data[VROM_BANK_ADDRESS],
+            num_prg_banks: ines_data[PRG_BANKS_ADDRESS],
+            num_chr_banks: ines_data[CHR_BANKS_ADDRESS],
             control: Control::new(ines_data[CONTROL_1], ines_data[CONTROL_2]),
             num_ram_banks: ines_data[RAM_BANK_ADDRESS],
         };

@@ -11,7 +11,7 @@ mod bus;
 pub mod cart;
 mod cpu;
 pub mod memory;
-// mod ppu;
+pub mod ppu;
 // mod test;
 mod inturrupts;
 
@@ -19,7 +19,7 @@ const CYCLES_PER_SECOND: f64 = 1790000.0;
 const WAIT_TIME: f64 = 1000.0 / CYCLES_PER_SECOND;
 
 pub struct Nes {
-    bus: Bus,
+    pub bus: Bus,
     wait_time: time::Duration,
 }
 
@@ -57,16 +57,17 @@ impl Nes {
         let y = self.bus.cpu.index_y;
         let p = self.bus.cpu.status;
         let sp = self.bus.cpu.stack_ptr;
-        let clock = self.bus.clock;
+        let cpu_clock = self.bus.clock;
         let op_code = fetch(&mut self.bus);
         let instruction = decode(op_code, &mut self.bus);
         let op_string = format!("{:?}", instruction);
+        let scan_line = self.bus.ppu.curr_scanline;
+        let ppu_clock = self.bus.ppu.clock;
         execute(&mut self.bus, &instruction);
         println!(
-            "{:04X} {:02X} {:<20} A:{:02X} X:{:02X} Y:{:02X} P:{:02X} SP:{:02X} CYC:{}",
-            pc, op_code, op_string, a, x, y, p, sp, clock,
+            "{:04X} {:02X} {:<20} A:{:02X} X:{:02X} Y:{:02X} P:{:02X} SP:{:02X} PPU: {:4},{:3} CYC:{}",
+            pc, op_code, op_string, a, x, y, p, sp, scan_line, ppu_clock, cpu_clock,
         );
-        // self.clock += cycles;
     }
 
     pub fn reset(&mut self) {
@@ -74,9 +75,10 @@ impl Nes {
     }
 
     pub fn run(&mut self) {
+        // println!("{:X}", self.bus.cpu.program_counter);
         loop {
-            sleep(self.wait_time);
-            self.tick();
+            // sleep(self.wait_time);
+            self.tick_debug();
         }
     }
 }

@@ -545,7 +545,9 @@ pub fn bpl(bus: &mut Bus, address_mode: &AddressMode, n_cycles: &i64) {
 }
 
 pub fn brk(bus: &mut Bus, address_mode: &AddressMode, n_cycles: &i64) {
-    todo!("BRK not implemented");
+    // todo!("BRK not implemented");
+    // let bytes = [bus.read(0xFFFE), bus.read(0xFFFF)];
+    // bus.cpu.program_counter = u16::from_le_bytes(bytes);
     bus.tick(*n_cycles);
 }
 
@@ -562,22 +564,22 @@ pub fn bvs(bus: &mut Bus, address_mode: &AddressMode, n_cycles: &i64) {
 }
 
 pub fn clc(bus: &mut Bus, address_mode: &AddressMode, n_cycles: &i64) {
-    bus.cpu.status &= Status::InvertedCarry;
+    bus.cpu.status &= !Status::Carry;
     bus.tick(*n_cycles);
 }
 
 pub fn cld(bus: &mut Bus, address_mode: &AddressMode, n_cycles: &i64) {
-    bus.cpu.status &= Status::InvertedDecimal;
+    bus.cpu.status &= !Status::Decimal;
     bus.tick(*n_cycles);
 }
 
 pub fn cli(bus: &mut Bus, address_mode: &AddressMode, n_cycles: &i64) {
-    bus.cpu.status &= Status::InvertedInturruptDisable;
+    bus.cpu.status &= !Status::InterruptDisable;
     bus.tick(*n_cycles);
 }
 
 pub fn clv(bus: &mut Bus, address_mode: &AddressMode, n_cycles: &i64) {
-    bus.cpu.status &= Status::InvertedOverflow;
+    bus.cpu.status &= !Status::Overflow;
     bus.tick(*n_cycles);
 }
 
@@ -745,7 +747,7 @@ pub fn lsr(bus: &mut Bus, address_mode: &AddressMode, n_cycles: &i64) {
     let is_carry = (param & BITMASK) != 0;
     let result = param >> 1;
     bus.cpu.status.set_flags(Status::Carry, is_carry);
-    bus.cpu.status &= Status::InvertedNegative;
+    bus.cpu.status &= !Status::Negative;
     test_and_set_zero_flag(&mut bus.cpu, result);
     match address_mode {
         AddressMode::Accumulator => bus.cpu.accumulator = result,
@@ -899,7 +901,7 @@ pub fn sed(bus: &mut Bus, address_mode: &AddressMode, n_cycles: &i64) {
 }
 
 pub fn sei(bus: &mut Bus, address_mode: &AddressMode, n_cycles: &i64) {
-    bus.cpu.status |= Status::InturruptDisable;
+    bus.cpu.status |= Status::InterruptDisable;
     bus.tick(*n_cycles);
 }
 

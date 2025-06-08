@@ -14,3 +14,4 @@ The NES relies heavily on memory mapping. My approach is to treat the system as 
 - Graphics
 - Audio
 - System clock and timing
+- change timing to a trigger instead of sleeping
