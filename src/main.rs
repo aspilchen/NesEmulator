@@ -2,9 +2,35 @@ mod nes;
 use nes::{cart::Cart, open_ines_file, Nes};
 use sdl2::{event::Event, keyboard::Keycode, pixels::PixelFormatEnum};
 
-use crate::nes::ppu::show_tile_bank;
+use crate::nes::ppu::{
+    chr_rom::{ChrBank, ChrRom},
+    Frame, SYSTEM_PALLETE,
+};
 
-fn show_tiles(cart: Cart) {
+pub fn render_tile_bank(bank: &ChrBank) -> Frame {
+    let mut frame = Frame::new();
+    for (i, tile) in bank.tiles.iter().enumerate() {
+        for tile_row in 0..=7 {
+            for tile_col in 0..=7 {
+                let value = tile.read(tile_row, tile_col);
+                let rgb = match value {
+                    0 => SYSTEM_PALLETE[0x01],
+                    1 => SYSTEM_PALLETE[0x23],
+                    2 => SYSTEM_PALLETE[0x27],
+                    3 => SYSTEM_PALLETE[0x30],
+                    _ => panic!("can't be"),
+                };
+                let col = ((i * 8) + tile_col) % 256;
+                let row = ((i / 32) * 8) + tile_row;
+                println!("{} {}", col, row);
+                frame.write(col, row, rgb)
+            }
+        }
+    }
+    frame
+}
+
+fn show_frame(frame: &Frame) {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
     let window = video_subsystem
@@ -22,9 +48,7 @@ fn show_tiles(cart: Cart) {
         .create_texture_target(PixelFormatEnum::RGB24, 256, 240)
         .unwrap();
 
-    let right_bank = show_tile_bank(&cart.chr_rom, 1);
-
-    texture.update(None, &right_bank.data, 256 * 3).unwrap();
+    texture.update(None, &frame.data, 256 * 3).unwrap();
     canvas.copy(&texture, None, None).unwrap();
     canvas.present();
 
@@ -43,8 +67,8 @@ fn show_tiles(cart: Cart) {
 }
 
 fn main() {
-    let cart = open_ines_file("super_mario.nes");
-    // println!("{:?}", cart.header);
-    // println!("{:X}", cart.header.control.get_mapper());
-    show_tiles(cart);
+    let cart = open_ines_file("pacman.nes");
+    let chr_rom = ChrRom::try_from(cart.chr_rom.as_slice()).expect("broken");
+    let frame = render_tile_bank(&chr_rom.banks[0]);
+    show_frame(&frame);
 }

@@ -1,4 +1,6 @@
 mod address;
+// mod chr_rom;
+pub mod chr_rom;
 mod control;
 mod mask;
 mod status;
